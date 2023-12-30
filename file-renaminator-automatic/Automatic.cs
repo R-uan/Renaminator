@@ -3,35 +3,18 @@ using System.IO;
 
 class Automatic {
 	static void Main() {
-		string PathName;
 		string CurrentPath = Environment.CurrentDirectory;
-
 		if (!Path.Exists(CurrentPath)) Environment.Exit(0);
-		PathName = Path.GetFileName(CurrentPath)!;
 
-		// Gets the files in the Path
+		string CommonName = String.Join("-", Path.GetFileName(CurrentPath)!.Split(" "));
 		string[] FilesFound = Directory.GetFiles(CurrentPath);
-		int FoundAmount = FilesFound.Length;
-
-		// Asks for the Name
-		if (PathName != null) {
-			string[] NameArray = PathName.Split(" ");
-			PathName = String.Join("-", NameArray);
-		}
+		Console.WriteLine($"{FilesFound.Length} files found in '{CurrentPath}'");
 
 		int Count = 1;
 		foreach (string FilePath in FilesFound) {
-			string NewName;
-			string NewPath;
-			string FileExtension = Path.GetExtension(FilePath);
-			string PathArray = Path.GetDirectoryName(FilePath)!;
-			string OldName = FilePath.Split("\\")[^1];
-
-			if (PathName != "") {
-				NewName = $"@{PathName}[{Count}]{FileExtension}";
-			} else { NewName = $"{Count}.{FileExtension}"; }
-
-			NewPath = Path.Combine(PathArray, NewName);
+			string OldName = Path.GetFileName(FilePath);
+			string NewName = GetNewFileName(FilePath);
+			string NewPath = $"{CurrentPath}\\{NewName}";
 			File.Move(FilePath, NewPath);
 			Logger(OldName, NewName);
 			Count++;
@@ -40,6 +23,20 @@ class Automatic {
 		static void Logger(string OldName, string NewName) {
 			string Now = DateTime.Now.ToShortTimeString();
 			Console.WriteLine($"[INFO * {Now}] : '{OldName}' renamed to '{NewName}'.");
+		}
+
+		string GetNewFileName(string FilePath) {
+			string NewName;
+			string FileExtension = Path.GetExtension(FilePath);
+			if (CommonName != "") {
+				NewName = $"@{CommonName}[{Count}]{FileExtension}";
+			} else { NewName = $"{Count}.{FileExtension}"; }
+
+			Boolean CheckIfExists = Path.Exists($"{CurrentPath}\\{NewName}");
+			if (CheckIfExists) {
+				Count++;
+				return GetNewFileName(FilePath);
+			} else return NewName.ToLower();
 		}
 	}
 }
