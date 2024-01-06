@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
+using Automatic_Renaminator;
 using System.Text.RegularExpressions;
-
 class Automatic {
 	static void Main() {
 		string CurrentPath = Environment.CurrentDirectory;
@@ -41,7 +41,17 @@ class Automatic {
 		Double ElapsedTime = Timer.Elapsed.TotalSeconds;
 		Console.WriteLine($"{FilesChanged} files were renamed in {ElapsedTime:F2} seconds");
 		Console.ReadKey();
-
+		string GetNewFilePath(string NewName) {
+			string NewPath = $"{CurrentPath}\\{NewName}";
+			return "";
+		}
+		string? GetNewFileName(string FilePath, string FileExtension) {
+			string NewName = $"@{CommonName.ToLower()}[{Count}]";
+			Boolean? IsFileUnique = FileDuplicationCheck.IsUnique(CurrentPath, FilePath, FileExtension);
+			if (IsFileUnique == null) return null;
+			else if (IsFileUnique.Value == false) { Count++; return GetNewFileName(FilePath, FileExtension); }
+			return $"{NewName}{FileExtension}";
+		}
 		static void Logger(string OldName, string NewName, LogLevel Level) {
 			string Now = DateTime.Now.ToShortTimeString();
 			if (Level == LogLevel.INFO) {
@@ -51,23 +61,6 @@ class Automatic {
 			}
 		}
 
-		string GetNewFileName(string FilePath, string FileExtension) {
-			string NewName;
-
-			if (CommonName != "") {
-				NewName = $"@{CommonName}[{Count}]";
-			} else { NewName = $"{Count}{FileExtension}"; }
-
-			NewName = NewName.ToLower();
-
-			Boolean CheckIfExistsPng = Path.Exists($"{CurrentPath}\\{NewName}.png");
-			Boolean CheckIfExistsJpg = Path.Exists($"{CurrentPath}\\{NewName}.jpg");
-			Boolean CheckIfExistsJpeg = Path.Exists($"{CurrentPath}\\{NewName}.jpeg");
-			if (CheckIfExistsPng || CheckIfExistsJpg || CheckIfExistsJpeg) {
-				Count++;
-				return GetNewFileName(FilePath, FileExtension);
-			} else return $"{NewName}{FileExtension}";
-		}
 	}
 }
 
